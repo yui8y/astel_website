@@ -26,8 +26,6 @@ function createCalmNormals(size = 256, strength = 6) {
 export function createWater(palette) {
     const waterNormals = createCalmNormals(256, 6);
 
-    scene.fog = new THREE.Fog(palette.horizon, 30, 400); // 色, 霧が始まる距離, 完全に霧になる距離
-
     // 水面
     const water = new Water(
     new THREE.PlaneGeometry(10000, 10000), // 十分広い板
@@ -48,29 +46,4 @@ export function createWater(palette) {
     water.material.uniforms.size.value = 0.3; 
 
     return water;
-}
-
-
-export function createRipples(x, z){
-    // 波紋
-    const ripples = [];         // 今出ている波紋のリスト
-    const RIPPLE_LIFE = 2.5;    // 波紋の寿命（秒）
-    let nextRipple = 2;         // 次の波紋までの残り時間
-
-    const ring = new THREE.Mesh(
-        new THREE.RingGeometry(0.9, 1.0, 24), // 内側の半径, 外側の半径, 角の数
-        new THREE.MeshBasicMaterial({
-        color: 0xffffff,  // 真っ白
-            transparent: true,
-            opacity: 0.8,     // 少し濃くして、明るい海でも見えるように
-            fog: false,       // 霧で色がくすまないように
-        })
-    )
-    ring.rotation.x = -Math.PI / 2;                 // 寝かせる
-    ring.position.set(x, water.position.y + 0.01, z); // 水面のほんの少し上
-    ring.userData.age = 0;                          // 生まれてからの時間
-    scene.add(ring);
-    ripples.push(ring);
-    
-    return ring;
 }

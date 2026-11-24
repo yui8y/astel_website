@@ -8,12 +8,38 @@ export function createRipples(scene, waterY) {
   let nextRipple = 2;
 
   function spawn(x, z) {
-    // 今の spawnRipple の中身をここへ
-    // （water.position.y の代わりに waterY を使う）
+    const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.9, 1.0, 24), // 内側の半径, 外側の半径, 角の数
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff,  // 真っ白
+        transparent: true,
+        opacity: RIPPLE_OPACITY,     // 少し濃くして、明るい海でも見えるように
+        fog: false,       // 霧で色がくすまないように
+    })
+    );
+    ring.rotation.x = -Math.PI / 2;                 // 寝かせる
+    ring.position.set(x, waterY + 0.01, z); // 水面のほんの少し上
+    ring.userData.age = 0;                          // 生まれてからの時間
+    scene.add(ring);
+    ripples.push(ring);
   }
 
   function update(delta) {
-    // 今の animate の中にある「波紋を出す」「育てる・片付ける」をここへ
+    for (let i = ripples.length - 1; i >= 0; i--) {
+    const r = ripples[i];
+    r.userData.age += delta;
+    const t = r.userData.age / RIPPLE_LIFE; // 0 → 1 に進む
+
+    r.scale.setScalar(0.1 + t * 1.5);       // 広がる
+    r.material.opacity = RIPPLE_OPACITY  * (1 - t);     // 薄くなる
+
+    if (t >= 1) {
+      scene.remove(r);
+      r.geometry.dispose(); // GPUのメモリも片付ける
+      r.material.dispose();
+      ripples.splice(i, 1); // リストから外す
+    }
+  }
   }
 
   return { update }; // 外からは update だけ使えるようにする
