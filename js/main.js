@@ -1,5 +1,6 @@
 //GameManager
 import * as THREE from 'three';
+import { Timer } from 'three/addons/misc/Timer.js';
 import { palettes } from './palettes.js';
 import { createRenderer, createCamera, handleResize } from './renderer.js';
 import { createSky, createStars, paintSky } from './sky.js';
@@ -61,6 +62,7 @@ env.start({
   onTick: (state) => hud.update(state),
   onTimeChange: (state) => fader.fadeTo(palettes[state.timeOfDay]),
 });
+hud.setMessage('銀河ステーション - 星の休息地');
 // デバッグ：T キーで時間帯を順番に切り替える
 /*const ORDER = ['dawn', 'day', 'dusk', 'night'];
 let debugIndex = ORDER.indexOf(env.state.timeOfDay);
@@ -71,9 +73,11 @@ window.addEventListener('keydown', (e) => {
 });*/
 
 // アニメーション
-const clock = new THREE.Clock();
-function animate() {
-  const delta = clock.getDelta();
+const timer = new Timer();
+function animate(timestamp) {
+  timer.update(timestamp);          // ← 毎フレーム最初に呼ぶ！
+  const delta = timer.getDelta();
+
   water.material.uniforms.time.value += delta * 0.01;
   ripples.update(delta);
   train.update(delta);
