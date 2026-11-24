@@ -1,33 +1,35 @@
 import * as THREE from 'three';
 
-//空
-export function createSky(palette) {
-  const geo = new THREE.SphereGeometry(500, 16, 12); // 半径, 横の分割, 縦の分割（少なめ＝ローポリ）
-  const pos = geo.getAttribute('position');          // 頂点の位置の一覧
-  const colors = [];
+// 空の色を塗る
+export function paintSky(sky, palette) {
+  const zenith = new THREE.Color(palette.zenith);
+  const middle = new THREE.Color(palette.middle);
+  const horizon = new THREE.Color(palette.horizon);
+  const pos = sky.geometry.getAttribute('position');
+  const col = sky.geometry.getAttribute('color');
   const c = new THREE.Color();
 
   for (let i = 0; i < pos.count; i++) {
-    const y = pos.getY(i) / 500; // 高さを -1〜1 にそろえる
-
-    if (y < 0.15) {
-      c.copy(palette.horizon); // 水平線付近と、その下
-    } else if (y < 0.5) {
-      c.lerpColors(palette.horizon, palette.middle, (y - 0.15) / 0.35);
-    } else {
-      c.lerpColors(palette.middle, palette.zenith, (y - 0.5) / 0.5);
-    }
-    colors.push(c.r, c.g, c.b);
+    const y = pos.getY(i) / 500;
+    if (y < 0.15) c.copy(horizon);
+    else if (y < 0.5) c.lerpColors(horizon, middle, (y - 0.15) / 0.35);
+    else c.lerpColors(middle, zenith, (y - 0.5) / 0.5);
+    col.setXYZ(i, c.r, c.g, c.b);
   }
+  col.needsUpdate = true; // GPUに知らせる
+}
 
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+// 空
+export function createSky(palette) {
+  const geo = new THREE.SphereGeometry(500, 16, 12);
+  const count = geo.getAttribute('position').count;
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(count * 3), 3)); // 空の色の箱
 
-  const mat = new THREE.MeshBasicMaterial({
-    vertexColors: true,     // 頂点の色を使う
-    side: THREE.BackSide,   // 球の「内側」を描く
-    fog: false,             // 霧の影響を受けない
-  });
-  return new THREE.Mesh(geo, mat);
+  const sky = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+    vertexColors: true, side: THREE.BackSide, fog: false,
+  }));
+  paintSky(sky, palette);
+  return sky;
 }
 
 // 星
