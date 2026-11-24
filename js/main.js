@@ -1,7 +1,7 @@
 //GameManager
 import * as THREE from 'three';
 import { palette } from './palette.js';
-import { createRenderer, createCamera, handleResize } from './js/renderer.js';
+import { createRenderer, createCamera, handleResize } from './renderer.js';
 import { createSky, createStars } from './sky.js';
 import { createWater } from './water.js';
 import { createRipples } from './ripples.js';

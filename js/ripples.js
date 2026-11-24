@@ -25,6 +25,15 @@ export function createRipples(scene, waterY) {
   }
 
   function update(delta) {
+    
+    nextRipple -= delta;
+    if (nextRipple <= 0) {
+      const x = (Math.random() - 0.5) * 10;
+      const z = -2 - Math.random() * 10;
+      spawn(x, z);
+      nextRipple = 2 + Math.random() * 4;
+    }
+    
     for (let i = ripples.length - 1; i >= 0; i--) {
     const r = ripples[i];
     r.userData.age += delta;

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 //空
-export function createSky() {
+export function createSky(palette) {
   const geo = new THREE.SphereGeometry(500, 16, 12); // 半径, 横の分割, 縦の分割（少なめ＝ローポリ）
   const pos = geo.getAttribute('position');          // 頂点の位置の一覧
   const colors = [];
@@ -31,7 +31,7 @@ export function createSky() {
 }
 
 // 星
-function createStars() {
+export function createStars() {
   const count = 300;
   const positions = [];
 
