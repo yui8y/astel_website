@@ -40,9 +40,35 @@ scene.add(water);
 // 波紋
 const ripples = createRipples(scene, water.position.y);
 
+//色塗り
+function applyPalette(p) {
+  paintSky(sky, p);
+  scene.fog.color.set(p.horizon);                           // 霧
+  water.material.uniforms.waterColor.value.set(p.water);    // 海
+  water.material.uniforms.sunColor.value.set(p.sun);        // 海のきらめき
+  light.color.set(p.sun);                                   // 光
+  ambient.color.set(p.ambient);                             // 全体の明るさ
+}
+
 // 列車
 const train = createTrain();
 scene.add(train.object);
+
+// 掲示板作成
+const hud = createHud();
+const fader = createPaletteFader(palette, applyPalette);
+env.start({
+  onTick: (state) => hud.update(state),
+  onTimeChange: (state) => fader.fadeTo(palettes[state.timeOfDay]),
+});
+// デバッグ：T キーで時間帯を順番に切り替える
+/*const ORDER = ['dawn', 'day', 'dusk', 'night'];
+let debugIndex = ORDER.indexOf(env.state.timeOfDay);
+window.addEventListener('keydown', (e) => {
+  if (e.key !== 't') return;
+  debugIndex = (debugIndex + 1) % ORDER.length; // 最後まで行ったら最初に戻る
+  fader.fadeTo(palettes[ORDER[debugIndex]]);
+});*/
 
 // アニメーション
 const clock = new THREE.Clock();
@@ -51,23 +77,7 @@ function animate() {
   water.material.uniforms.time.value += delta * 0.01;
   ripples.update(delta);
   train.update(delta);
-  renderer.render(scene, camera);
   fader.update(delta);
+  renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
-
-// 水面作成
-const hud = createHud();
-const fader = createPaletteFader(palette, applyPalette);
-env.start({
-  onTick: (state) => hud.update(state),
-  onTimeChange: (state) => fader.fadeTo(palettes[state.timeOfDay]),
-});
-// デバッグ：T キーで時間帯を順番に切り替える
-const ORDER = ['dawn', 'day', 'dusk', 'night'];
-let debugIndex = ORDER.indexOf(env.state.timeOfDay);
-window.addEventListener('keydown', (e) => {
-  if (e.key !== 't') return;
-  debugIndex = (debugIndex + 1) % ORDER.length; // 最後まで行ったら最初に戻る
-  fader.fadeTo(palettes[ORDER[debugIndex]]);
-});
