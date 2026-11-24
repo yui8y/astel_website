@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>星を巡る誰でもない者</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    canvas {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+        image-rendering: pixelated;/* 拡大するとき、ぼかさない */
+    }
+  </style>
+  <!-- 「three」という名前で、Three.jsの場所を登録する -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="main.js"></script>
+  <script src="./js/Water.js"></script>
+</head>
+
+<body>
+
+</body>
+
+</html>
