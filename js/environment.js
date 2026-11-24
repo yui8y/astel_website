@@ -1,3 +1,6 @@
+const TIMES = ['dawn', 'day', 'dusk', 'night'];
+const CHECK_INTERVAL = 10 * 1000; // 10秒ごとに確認
+
 // 時間帯を調べる
 export function getTimeOfDay(date = new Date()) {
   const h = date.getHours();
@@ -14,4 +17,37 @@ export function getSeason(date = new Date()) {
   if (m >= 6 && m <= 8) return 'summer';
   if (m >= 9 && m <= 11) return 'autumn';
   return 'winter';
+}
+
+// 掲示板を作る
+export function createEnvironment() {
+  // 確認用：?time=night など。知っている名前のときだけ使う
+  const debugTime = new URLSearchParams(location.search).get('time');
+  const fixedTime = TIMES.includes(debugTime) ? debugTime : null;
+
+  function read(now) {
+    return {
+      now,
+      timeOfDay: fixedTime ?? getTimeOfDay(now),
+      season: getSeason(now),
+    };
+  }
+
+  const state = read(new Date()); // 作った瞬間の状態
+
+  // 見張りを始める
+  function start({ onTick, onTimeChange }) {
+    function check() {
+      const next = read(new Date());
+      const timeChanged = next.timeOfDay !== state.timeOfDay;
+      Object.assign(state, next); // 掲示板を書き換える
+
+      onTick(state);                          // 毎回：時計の表示など
+      if (timeChanged) onTimeChange(state);   // 変わったときだけ：景色の切り替え
+    }
+    check();
+    setInterval(check, CHECK_INTERVAL);
+  }
+
+  return { state, start };
 }
