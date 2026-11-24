@@ -1,4 +1,44 @@
+//GameManager
 import * as THREE from 'three';
+import { palette } from './palette.js';
+import { createRenderer, createCamera, handleResize } from './js/renderer.js';
+import { createSky, createStars } from './sky.js';
+import { createWater } from './water.js';
+import { createRipples } from './ripples.js';
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(palette.horizon, 30, 400); // 水面より先に作る
+
+const camera = createCamera();
+const renderer = createRenderer();
+handleResize(renderer, camera);
+
+// ライト
+const light = new THREE.DirectionalLight(palette.sun, 2);
+light.position.set(0, 1, -5);
+scene.add(light);
+scene.add(new THREE.AmbientLight(0xc8b8d8, 1.2));
+
+scene.add(createSky(palette));
+scene.add(createStars());
+
+const water = createWater(palette);
+scene.add(water);
+
+const ripples = createRipples(scene, water.position.y);
+
+// （回る星は、列車ができたら置き換え）
+
+const clock = new THREE.Clock();
+function animate() {
+  const delta = clock.getDelta();
+  water.material.uniforms.time.value += delta * 0.01;
+  ripples.update(delta);
+  renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(animate);
+
+/*import * as THREE from 'three';
 import { Water } from 'three/addons/objects/Water.js';
 
 // ===== 色のパレット（後で時間帯ごとに切り替える） =====
@@ -48,7 +88,7 @@ scene.add(new THREE.AmbientLight(0xc8b8d8, 1.2)); // 薄紫で全体を明るく
 // 法線マップ（波の凸凹の情報）
 // 静かな水面用の法線マップを、その場で作る
 // strength：揺らぎの強さ（0 で完全な鏡）
-function createCalmNormals(size = 256, strength = 2) {
+function createCalmNormals(size = 256, strength = 6) {
   const canvas = document.createElement('canvas'); // 見えない画用紙
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext('2d');
@@ -77,8 +117,6 @@ const water = new Water(
     textureWidth: 256,   // 反射画像の解像度（ドット風なら低めでOK）
     textureHeight: 256,
     waterNormals: waterNormals,
-    sunDirection: new THREE.Vector3(0.3, 1, 0.2).normalize(), // 光が来る向き
-    sunColor: 0x222233,
     waterColor: palette.water,
     sunColor: palette.sun,
     sunDirection: new THREE.Vector3(0, 0.15, -1).normalize(),
@@ -140,6 +178,7 @@ function createSky() {
 }
 scene.add(createSky());
 
+//星
 function createStars() {
   const count = 300;
   const positions = [];
@@ -221,4 +260,4 @@ window.addEventListener('resize', () => {
     Math.floor(window.innerHeight / PIXEL_SIZE),
     false
   );
-});
+});*/
