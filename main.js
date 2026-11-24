@@ -1,6 +1,15 @@
 import * as THREE from 'three';
 import { Water } from 'three/addons/objects/Water.js';
 
+// ===== 色のパレット（後で時間帯ごとに切り替える） =====
+const palette = {
+  zenith:  new THREE.Color(0x9fc4e8), // 天頂
+  middle:  new THREE.Color(0xd9c6e8), // 中間
+  horizon: new THREE.Color(0xffd1b0), // 水平線
+  water:   0xc8d6ea,                  // 海
+  sun:     0xfff1e0,                  // 朝日の光
+};
+
 // ① 舞台
 const scene = new THREE.Scene();
 const PIXEL_SIZE = 4; // 1ドットを何ピクセル分の大きさにするか
@@ -31,14 +40,35 @@ const star = new THREE.Mesh(geometry, material);
 scene.add(star);
 
 // ライト
-const light = new THREE.DirectionalLight(0xffffff, 2);
-light.position.set(3, 4, 5);
+const light = new THREE.DirectionalLight(palette.sun, 2);
+light.position.set(0, 1, -5); // 奥から照らす
 scene.add(light);
-scene.add(new THREE.AmbientLight(0x404060)); // 全体をうっすら照らす
+scene.add(new THREE.AmbientLight(0xc8b8d8, 1.2)); // 薄紫で全体を明るく
 
 // 法線マップ（波の凸凹の情報）
-const waterNormals = new THREE.TextureLoader().load('textures/waternormals.jpg');
-waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; // 画像を繰り返し敷き詰める
+// 静かな水面用の法線マップを、その場で作る
+// strength：揺らぎの強さ（0 で完全な鏡）
+function createCalmNormals(size = 256, strength = 2) {
+  const canvas = document.createElement('canvas'); // 見えない画用紙
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(size, size);     // 1ピクセルずつ塗れる配列
+
+  for (let i = 0; i < size * size; i++) {
+    img.data[i * 4 + 0] = 128 + (Math.random() - 0.5) * strength * 2; // R：左右の傾き
+    img.data[i * 4 + 1] = 128 + (Math.random() - 0.5) * strength * 2; // G：前後の傾き
+    img.data[i * 4 + 2] = 255;                                         // B：上向き
+    img.data[i * 4 + 3] = 255;                                         // 不透明
+  }
+  ctx.putImageData(img, 0, 0);
+
+  const tex = new THREE.CanvasTexture(canvas); // 画用紙をテクスチャにする
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+const waterNormals = createCalmNormals(256, 6);
+
+scene.fog = new THREE.Fog(palette.horizon, 30, 400); // 色, 霧が始まる距離, 完全に霧になる距離
 
 // 水面
 const water = new Water(
@@ -48,14 +78,99 @@ const water = new Water(
     textureHeight: 256,
     waterNormals: waterNormals,
     sunDirection: new THREE.Vector3(0.3, 1, 0.2).normalize(), // 光が来る向き
-    sunColor: 0xffffff,
-    waterColor: 0x0a1030,  // 夜の海の色
-    distortionScale: 2.0,  // 揺れの強さ
+    sunColor: 0x222233,
+    waterColor: palette.water,
+    sunColor: palette.sun,
+    sunDirection: new THREE.Vector3(0, 0.15, -1).normalize(),
+    fog: true,
+    distortionScale: 0,  // 揺れの強さ
   }
 );
+
+// ===== 波紋 =====
+const ripples = [];         // 今出ている波紋のリスト
+const RIPPLE_LIFE = 2.5;    // 波紋の寿命（秒）
+let nextRipple = 2;         // 次の波紋までの残り時間
+
+function spawnRipple(x, z) {
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.9, 1.0, 24), // 内側の半径, 外側の半径, 角の数
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff,  // 真っ白
+        transparent: true,
+        opacity: 0.8,     // 少し濃くして、明るい海でも見えるように
+        fog: false,       // 霧で色がくすまないように
+    })
+  );
+  ring.rotation.x = -Math.PI / 2;                 // 寝かせる
+  ring.position.set(x, water.position.y + 0.01, z); // 水面のほんの少し上
+  ring.userData.age = 0;                          // 生まれてからの時間
+  scene.add(ring);
+  ripples.push(ring);
+}
+
+//空
+function createSky() {
+  const geo = new THREE.SphereGeometry(500, 16, 12); // 半径, 横の分割, 縦の分割（少なめ＝ローポリ）
+  const pos = geo.getAttribute('position');          // 頂点の位置の一覧
+  const colors = [];
+  const c = new THREE.Color();
+
+  for (let i = 0; i < pos.count; i++) {
+    const y = pos.getY(i) / 500; // 高さを -1〜1 にそろえる
+
+    if (y < 0.15) {
+      c.copy(palette.horizon); // 水平線付近と、その下
+    } else if (y < 0.5) {
+      c.lerpColors(palette.horizon, palette.middle, (y - 0.15) / 0.35);
+    } else {
+      c.lerpColors(palette.middle, palette.zenith, (y - 0.5) / 0.5);
+    }
+    colors.push(c.r, c.g, c.b);
+  }
+
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors: true,     // 頂点の色を使う
+    side: THREE.BackSide,   // 球の「内側」を描く
+    fog: false,             // 霧の影響を受けない
+  });
+  return new THREE.Mesh(geo, mat);
+}
+scene.add(createSky());
+
+function createStars() {
+  const count = 300;
+  const positions = [];
+
+  for (let i = 0; i < count; i++) {
+    const y = 0.3 + Math.random() * 0.7;        // 上の方にだけ置く（水平線付近は明るいから）
+    const angle = Math.random() * Math.PI * 2;  // ぐるっと一周のどこか
+    const r = Math.sqrt(1 - y * y);
+    positions.push(Math.cos(angle) * r * 450, y * 450, Math.sin(angle) * r * 450);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+  const mat = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 1,               // ドット1つ分
+    sizeAttenuation: false, // 遠くても小さくならない
+    transparent: true,
+    opacity: 0.6,          // 昼に近いから、うっすら
+    fog: false,
+  });
+  return new THREE.Points(geo, mat);
+}
+
+scene.add(createStars());
+
 water.rotation.x = -Math.PI / 2; // 板を寝かせる（立った状態で作られるから）
 water.position.y = -1.5;         // 星より少し下に
 scene.add(water);
+water.material.uniforms.size.value = 0.3; 
 
 // 毎フレーム呼ばれる（Unityの Update() にあたる）
 const clock = new THREE.Clock(); // Unityの Time にあたる
@@ -65,7 +180,33 @@ function animate() {
   star.rotation.x += 0.6 * delta; // 1秒に0.6ラジアン回る
   star.rotation.y += 0.6 * delta;
 
-  water.material.uniforms.time.value += delta; // 波の時間を進める
+  water.material.uniforms.time.value += delta * 0.01; // 波の時間を進める
+
+    // 一定時間ごとに波紋を出す
+  nextRipple -= delta;
+  if (nextRipple <= 0) {
+    const x = (Math.random() - 0.5) * 10; // 左右 -5〜5
+    const z = -2 - Math.random() * 10;    // 奥 -2〜-12
+    spawnRipple(x, z);
+    nextRipple = 2 + Math.random() * 4;   // 次は2〜6秒後
+  }
+
+  // 波紋を育てる・片付ける（後ろから回すのがポイント）
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    const r = ripples[i];
+    r.userData.age += delta;
+    const t = r.userData.age / RIPPLE_LIFE; // 0 → 1 に進む
+
+    r.scale.setScalar(0.1 + t * 1.5);       // 広がる
+    r.material.opacity = 0.8 * (1 - t);     // 薄くなる
+
+    if (t >= 1) {
+      scene.remove(r);
+      r.geometry.dispose(); // GPUのメモリも片付ける
+      r.material.dispose();
+      ripples.splice(i, 1); // リストから外す
+    }
+  }
 
   renderer.render(scene, camera);
 }
