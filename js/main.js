@@ -1,17 +1,18 @@
 //GameManager
 import * as THREE from 'three';
 import { Timer } from 'three/addons/misc/Timer.js';
-import { palettes } from './palettes.js';
-import { createRenderer, createCamera, handleResize } from './renderer.js';
-import { createSky, createStars, paintSky } from './sky.js';
-import { createHud } from './hud.js';
-import { createWater, excludeFromReflection } from './water.js';
-import { createRipples } from './ripples.js';
-import { createTrain } from './train.js';
-import { createEnvironment } from './environment.js';
-import { createPaletteFader } from './palette-fader.js';
-import { createRain } from './rain.js';
-import { tintForWeather } from './weather-tint.js';
+import { createRenderer, createCamera, handleResize } from './renderer.js';//カメラ・映写機
+import { createEnvironment } from './environment.js';//時刻・天気呼び出し
+import { createSky, createStars, paintSky } from './sky.js';//空処理
+import { palettes } from './palettes.js';//空の色リスト
+import { createPaletteFader } from './palette-fader.js';//時刻による空の色変更処理
+import { tintForWeather } from './weather-tint.js';//天気ごとの空色フィルタ処理
+import { createHud } from './hud.js';//時刻・天気UI処理
+import { createWater, excludeFromReflection } from './water.js';//海3D処理
+import { createRipples } from './ripples.js';//波紋3D処理
+import { createTrain } from './train.js';//列車3D処理
+import { createRain } from './rain.js';//雨3D処理
+import { createSnow } from './snow.js';//雪3D処理
 
 
 const env = createEnvironment();
@@ -46,10 +47,15 @@ scene.add(water);
 
 // 波紋
 const ripples = createRipples(scene, water.position.y);
+
+// 天気処理
 // 雨（水面に落ちたら、波紋を出す）
 const rain = createRain((x, z) => ripples.spawn(x, z));
 scene.add(rain.object);
-excludeFromReflection(water, [rain.object]);
+// 雪
+const snow = createSnow();
+scene.add(snow.object);
+excludeFromReflection(water, [rain.object, snow.object]);
 
 //色塗り
 function applyPalette(p) {
@@ -74,6 +80,8 @@ env.start({
   onWeatherChange: (state) => {
     hud.update(state);
     rain.setActive(state.weather === 'rain' || state.weather === 'thunder');
+    snow.setActive(state.weather === 'snow');
+    fader.fadeTo(targetPalette(state));
   },
 });
 hud.setMessage('銀河ステーション - 星の休息地');
@@ -96,8 +104,8 @@ function animate(timestamp) {
   ripples.update(delta);
   train.update(delta);
   fader.update(delta);
-  renderer.render(scene, camera);
+  snow.update(delta);
   rain.update(delta);
-  fader.fadeTo(targetPalette(state));
+  renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
