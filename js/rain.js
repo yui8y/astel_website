@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 
-const COUNT = 800;          // 雨粒の数
-const SPEED = 18;           // 落ちる速さ
-const LENGTH = 0.8;         // 雨粒の長さ
-const WIND = 2;             // 横に流れる速さ（斜めに降る）
-const RIPPLE_CHANCE = 0.03; // 水面に落ちたとき、波紋を出す確率（3%）
+const COUNT = 10;          // 雨粒の数
+const SPEED = 40;           // 落ちる速さ
+const LENGTH = 1.5;         // 雨粒の長さ
+const WIND = 1;             // 横に流れる速さ（斜めに降る）
+const RIPPLE_CHANCE = 0.3; // 水面に落ちたとき、波紋を出す確率（3%）
 
 // 雨を降らせる範囲
 const AREA = { width: 40, top: 20, bottom: -1.5, near: 4, far: -40 };
@@ -16,7 +16,7 @@ export function createRain(onHit) {
   geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
   const mat = new THREE.LineBasicMaterial({
-    color: 0xdfe8ff,   // ほんのり青白い
+    color: 0xffffff,   // ほんのり青白い
     transparent: true,
     opacity: 0.6,
     fog: true,         // 遠くの雨は霧にかすむ

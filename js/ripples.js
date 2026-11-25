@@ -12,7 +12,7 @@ export function createRipples(scene, waterY) {
 
   function spawn(x, z) {
     const ring = new THREE.Mesh(
-    new THREE.RingGeometry(0.9, 1.0, 24), // 内側の半径, 外側の半径, 角の数
+    RING_GEOMETRY,
     new THREE.MeshBasicMaterial({
       color: 0xffffff,  // 真っ白
         transparent: true,
@@ -22,7 +22,9 @@ export function createRipples(scene, waterY) {
     );
     ring.rotation.x = -Math.PI / 2;                 // 寝かせる
     ring.position.set(x, waterY + 0.01, z); // 水面のほんの少し上
-    ring.userData.age = 0;                          // 生まれてからの時間
+    ring.userData.age = 0;  
+    ring.userData.maxScale = 0.8 + Math.random() * 1.0;
+    ring.userData.life = RIPPLE_LIFE * (0.6 + ring.userData.maxScale * 0.3); // 大きいほど長生き                         // 生まれてからの時間
     scene.add(ring);
     ripples.push(ring);
   }
@@ -40,9 +42,9 @@ export function createRipples(scene, waterY) {
     for (let i = ripples.length - 1; i >= 0; i--) {
     const r = ripples[i];
     r.userData.age += delta;
-    const t = r.userData.age / RIPPLE_LIFE; // 0 → 1 に進む
+        const t = r.userData.age / r.userData.life; // その波紋の寿命を使う
 
-    r.scale.setScalar(0.1 + t * 1.5);       // 広がる
+    r.scale.setScalar(0.1 + t * r.userData.maxScale);       // 広がる
     r.material.opacity = RIPPLE_OPACITY  * (1 - t);     // 薄くなる
 
     if (t >= 1) {

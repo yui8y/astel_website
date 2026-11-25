@@ -35,7 +35,8 @@ export function createHud() {
   }
 
   function update(state) {
-    time.textContent = state.now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+        time.textContent = state.now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    info.textContent = `${SEASON_LABELS[state.season]} · ${TIME_LABELS[state.timeOfDay]}`; // ← 戻す
     const temp = state.temperature !== null ? `　${state.temperature}℃` : '';
     weather.textContent = `${WEATHER_LABELS[state.weather]}${temp}`;
   }

@@ -5,7 +5,7 @@ import { palettes } from './palettes.js';
 import { createRenderer, createCamera, handleResize } from './renderer.js';
 import { createSky, createStars, paintSky } from './sky.js';
 import { createHud } from './hud.js';
-import { createWater } from './water.js';
+import { createWater, excludeFromReflection } from './water.js';
 import { createRipples } from './ripples.js';
 import { createTrain } from './train.js';
 import { createEnvironment } from './environment.js';
@@ -44,6 +44,7 @@ const ripples = createRipples(scene, water.position.y);
 // 雨（水面に落ちたら、波紋を出す）
 const rain = createRain((x, z) => ripples.spawn(x, z));
 scene.add(rain.object);
+excludeFromReflection(water, [rain.object]);
 
 //色塗り
 function applyPalette(p) {

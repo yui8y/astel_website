@@ -47,3 +47,17 @@ export function createWater(palette) {
 
     return water;
 }
+
+// 指定したものを、海の反射に写らないようにする
+export function excludeFromReflection(water, objects) {
+  const renderReflection = water.onBeforeRender; // 元の「反射を撮る処理」を取っておく
+
+  water.onBeforeRender = function (...args) {
+    const wasVisible = objects.map((o) => o.visible); // 今見えているかを覚えておく
+    objects.forEach((o) => { o.visible = false; });    // 隠す
+
+    renderReflection.apply(this, args);                 // 反射を撮る
+
+    objects.forEach((o, i) => { o.visible = wasVisible[i]; }); // 元に戻す
+  };
+}
