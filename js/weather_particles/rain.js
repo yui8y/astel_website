@@ -6,7 +6,7 @@ const LENGTH = 1.5;
 const WIND = 1;
 const RIPPLE_CHANCE = 0.3; // 30%
 const RIPPLE_NEAR = 2;    // これより手前は、カメラの真下で見えない
-const RIPPLE_FAR = -15;   // これより奥は、波紋が細くなりすぎてドットでつぶれるs
+const RIPPLE_FAR = -15;   // これより奥は、波紋が細くなりすぎてドットでつぶれる
 
 export function createRain(onHit) {
   return createParticles({
