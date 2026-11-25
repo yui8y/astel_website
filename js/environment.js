@@ -12,7 +12,7 @@ export function getTimeOfDay(date = new Date()) {
 
 // 季節を調べる
 export function getSeason(date = new Date()) {
-  const m = date.getMonth() + 1; // ⚠️ JSの月は0始まり（1月が0）だから +1 する
+  const m = date.getMonth() + 1;
   if (m >= 3 && m <= 5) return 'spring';
   if (m >= 6 && m <= 8) return 'summer';
   if (m >= 9 && m <= 11) return 'autumn';
