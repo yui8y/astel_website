@@ -11,8 +11,8 @@ import { createHud } from './hud.js';//時刻・天気UI処理
 import { createWater, excludeFromReflection } from './water.js';//海3D処理
 import { createRipples } from './ripples.js';//波紋3D処理
 import { createTrain } from './train.js';//列車3D処理
-import { createRain } from './rain.js';//雨3D処理
-import { createSnow } from './snow.js';//雪3D処理
+import { createRain } from './weather_particles/rain.js';//雨3D処理
+import { createSnow } from './weather_particles/snow.js';//雪3D処理
 
 
 const env = createEnvironment();
