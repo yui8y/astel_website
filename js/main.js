@@ -11,10 +11,15 @@ import { createTrain } from './train.js';
 import { createEnvironment } from './environment.js';
 import { createPaletteFader } from './palette-fader.js';
 import { createRain } from './rain.js';
+import { tintForWeather } from './weather-tint.js';
 
 
 const env = createEnvironment();
-const palette = palettes[env.state.timeOfDay];
+// 時間帯のパレットに、天気のフィルターをかけたもの
+function targetPalette(state) {
+  return tintForWeather(palettes[state.timeOfDay], state.weather);
+}
+const palette = targetPalette(env.state);
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(palette.horizon, 30, 400); // 水面より先に作る
@@ -93,5 +98,6 @@ function animate(timestamp) {
   fader.update(delta);
   renderer.render(scene, camera);
   rain.update(delta);
+  fader.fadeTo(targetPalette(state));
 }
 renderer.setAnimationLoop(animate);
