@@ -5,6 +5,8 @@ const SPEED = 40;
 const LENGTH = 1.5;
 const WIND = 1;
 const RIPPLE_CHANCE = 0.3; // 30%
+const RIPPLE_NEAR = 2;    // これより手前は、カメラの真下で見えない
+const RIPPLE_FAR = -15;   // これより奥は、波紋が細くなりすぎてドットでつぶれるs
 
 export function createRain(onHit) {
   return createParticles({
@@ -35,6 +37,7 @@ export function createRain(onHit) {
     },
 
     onLand(p) {
+      if (p.z > RIPPLE_NEAR || p.z < RIPPLE_FAR) return; // 見えない場所では出さない
       if (Math.random() < RIPPLE_CHANCE) onHit(p.x, p.z);
     },
   });
