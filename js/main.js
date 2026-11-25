@@ -10,6 +10,7 @@ import { createRipples } from './ripples.js';
 import { createTrain } from './train.js';
 import { createEnvironment } from './environment.js';
 import { createPaletteFader } from './palette-fader.js';
+import { createRain } from './rain.js';
 
 
 const env = createEnvironment();
@@ -40,6 +41,9 @@ scene.add(water);
 
 // 波紋
 const ripples = createRipples(scene, water.position.y);
+// 雨（水面に落ちたら、波紋を出す）
+const rain = createRain((x, z) => ripples.spawn(x, z));
+scene.add(rain.object);
 
 //色塗り
 function applyPalette(p) {
@@ -61,6 +65,10 @@ const fader = createPaletteFader(palette, applyPalette);
 env.start({
   onTick: (state) => hud.update(state),
   onTimeChange: (state) => fader.fadeTo(palettes[state.timeOfDay]),
+  onWeatherChange: (state) => {
+    hud.update(state);
+    rain.setActive(state.weather === 'rain' || state.weather === 'thunder');
+  },
 });
 hud.setMessage('銀河ステーション - 星の休息地');
 // デバッグ：T キーで時間帯を順番に切り替える
@@ -83,5 +91,6 @@ function animate(timestamp) {
   train.update(delta);
   fader.update(delta);
   renderer.render(scene, camera);
+  rain.update(delta);
 }
 renderer.setAnimationLoop(animate);

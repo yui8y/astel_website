@@ -1,5 +1,6 @@
 const TIME_LABELS = { dawn: '朝焼け', day: '昼', dusk: '夕暮れ', night: '夜' };
 const SEASON_LABELS = { spring: '春', summer: '夏', autumn: '秋', winter: '冬' };
+const WEATHER_LABELS = {clear: '晴', cloudy: '曇', fog: '霧', rain: '雨', snow: '雪', thunder: '雷', unknown: '—', };
 const FADE_MS = 600;
 
 function make(tag, className, parent) {
@@ -21,6 +22,7 @@ export function createHud() {
   const info = make('span', 'hud-info', row2);
 
   const message = make('p', 'hud-message', root);
+  const weather = make('div', 'hud-weather', document.body);
 
   // メッセージを、一度消してから新しい文でふわっと出す
   function setMessage(text) {
@@ -34,7 +36,8 @@ export function createHud() {
 
   function update(state) {
     time.textContent = state.now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-    info.textContent = `${SEASON_LABELS[state.season]} · ${TIME_LABELS[state.timeOfDay]}`;
+    const temp = state.temperature !== null ? `　${state.temperature}℃` : '';
+    weather.textContent = `${WEATHER_LABELS[state.weather]}${temp}`;
   }
 
   return { update, setMessage };

@@ -2,10 +2,13 @@ import * as THREE from 'three';
 
 const RIPPLE_LIFE = 2.5;
 const RIPPLE_OPACITY = 0.8;
+const RING_GEOMETRY = new THREE.RingGeometry(0.9, 1.0, 24);
 
 export function createRipples(scene, waterY) {
   const ripples = [];
   let nextRipple = 2;
+  let minGap = 2;   // 次の波紋までの最短
+  let maxGap = 6;   // 次の波紋までの最長
 
   function spawn(x, z) {
     const ring = new THREE.Mesh(
@@ -31,7 +34,7 @@ export function createRipples(scene, waterY) {
       const x = (Math.random() - 0.5) * 10;
       const z = -2 - Math.random() * 10;
       spawn(x, z);
-      nextRipple = 2 + Math.random() * 4;
+      nextRipple = minGap + Math.random() * (maxGap - minGap);
     }
     
     for (let i = ripples.length - 1; i >= 0; i--) {
@@ -51,5 +54,11 @@ export function createRipples(scene, waterY) {
   }
   }
 
-  return { update }; // 外からは update だけ使えるようにする
+  function setFrequency(min, max) {
+    minGap = min;
+    maxGap = max;
+    nextRipple = Math.min(nextRipple, max); // すぐに新しい間隔で出始めるように
+  }
+
+  return { update, setFrequency, spawn };
 }

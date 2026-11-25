@@ -26,7 +26,7 @@ export async function fetchWeather() {
   }
   const data = await res.json();      // 届いた中身を、JSのデータに変換
 
-  // 🔒 届いた中身が、思った形かどうか確かめる
+  // 届いた中身が、思った形かどうか確かめる
   const code = data?.current?.weather_code;
   if (typeof code !== 'number') {
     throw new Error('天気のデータの形が想定と違います');
