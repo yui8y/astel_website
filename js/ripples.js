@@ -49,7 +49,6 @@ export function createRipples(scene, waterY) {
 
     if (t >= 1) {
       scene.remove(r);
-      r.geometry.dispose(); // GPUのメモリも片付ける
       r.material.dispose();
       ripples.splice(i, 1); // リストから外す
     }
