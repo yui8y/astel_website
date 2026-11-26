@@ -11,6 +11,11 @@ function fitToWindow(renderer) {
   );
 }
 
+// 画面の縦が、だいたい270ドットになるように、ドットの大きさを決める
+function pixelSize() {
+  return Math.max(1, Math.round(window.innerHeight / 270));
+}
+
 // カメラ（視野角, 画面の縦横比, 映る一番近い距離, 一番遠い距離）
 export function createCamera() {
   const camera = new THREE.PerspectiveCamera(

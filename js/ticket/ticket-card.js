@@ -25,8 +25,11 @@ function download(canvas) {
   }, 'image/png');
 }
 
-export function showTicketCard(canvas, { onClose } = {}) {
+export function showTicketCard(canvas, { rect, onClose } = {}) {
   const card = make('div', 'ticket-card', document.body);
+  card.style.left = `${rect.left}px`;
+  card.style.top = `${rect.top}px`;
+  card.style.width = `${rect.width}px`;
   card.appendChild(canvas);
 
   const actions = make('div', 'ticket-actions', card);

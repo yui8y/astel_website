@@ -147,8 +147,10 @@ async function startTicket() {
   ticketButton.setEnabled(false);
 
   ticket = await createTicket(env.state, {
+    camera,                                         // ← カメラを渡す
     onLanded: () => {
       showTicketCard(ticket.canvas, {
+        rect: ticket.getScreenRect(camera),  
         onClose: () => {               // 閉じたら片付けて、また押せるように
           scene.remove(ticket.object);
           ticket.dispose();
@@ -161,3 +163,4 @@ async function startTicket() {
   });
   scene.add(ticket.object);
 }
+

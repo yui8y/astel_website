@@ -9,9 +9,24 @@ const RISE_TIME = 1.6;    // 起き上がるのにかかる秒数
 const ARC = 0.8;          // 道すじのふくらみ
 const LIE = -1.2;         // 横たわる角度（-1.57で真横。少し手前にして、表が見えるように）
 const SPIN = Math.PI * 1; // 舞っている間に回る量（1回転）
+const MAX_HEIGHT = 0.35; // 画面の高さに対する、切符の高さの割合（最大）
+const MAX_WIDTH = 0.8;   // 画面の横幅に対する、切符の横幅の割合（最大）
+
+// 切符がちょうど収まる、カメラからの距離を計算する
+function fitDistance(camera) {
+  const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const byHeight = SIZE.h / (2 * tan * MAX_HEIGHT);
+  const byWidth = SIZE.w / (2 * tan * camera.aspect * MAX_WIDTH);
+  return Math.max(byHeight, byWidth); // 遠い方＝どっちにも収まる
+}
 
 export async function createTicket(state, { onLanded } = {}) {
   const canvas = await drawTicketFace(state);
+
+  // 今の画面に合わせて、止まる位置と出発の位置を決める
+  const endZ = camera.position.z - fitDistance(camera);
+  const end = { ...END, z: endZ };
+  const start = { ...START, z: endZ - 1.5 }; // 止まる位置より、少し奥から
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -92,5 +107,20 @@ export async function createTicket(state, { onLanded } = {}) {
     texture.dispose();
   }
 
-  return { object: mesh, update, canvas, dispose };
+  // 今、画面のどこに、どの大きさで映っているか（2Dの切符を重ねるため）
+  function getScreenRect(camera) {
+    mesh.updateMatrixWorld();
+    const box = new THREE.Box3().setFromObject(mesh); // 切符を囲む箱
+    const a = box.min.clone().project(camera);        // 左下の角 → 画面の位置（-1〜1）
+    const b = box.max.clone().project(camera);        // 右上の角 → 画面の位置
+    const toX = (v) => ((v + 1) / 2) * window.innerWidth;
+    const toY = (v) => ((1 - v) / 2) * window.innerHeight;
+    return {
+      left: toX(Math.min(a.x, b.x)),
+      top: toY(Math.max(a.y, b.y)),
+      width: Math.abs(toX(b.x) - toX(a.x)),
+    };
+  }
+
+  return { object: mesh, update, canvas, dispose, getScreenRect };
 }

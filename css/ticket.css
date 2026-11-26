@@ -1,17 +1,14 @@
 .ticket-card {
   position: fixed;
-  top: 50%;
-  left: 50%;
   z-index: 5;
-  width: min(65vh, 90vw);                       /* 3Dの切符とほぼ同じ大きさ */
-  transform: translate(-50%, -50%) scale(0.96);
+  transform: scale(0.96);
   opacity: 0;
   transition: opacity 0.5s ease, transform 0.5s ease;
   filter: drop-shadow(0 4px 12px rgba(42, 36, 64, 0.25));
 }
 .ticket-card.is-visible {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  transform: scale(1);
 }
 .ticket-card canvas {
   display: block;
@@ -44,6 +41,10 @@
 
 /* 2Dの切符の下のボタン */
 .ticket-actions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
   gap: 16px;
