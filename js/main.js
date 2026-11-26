@@ -13,7 +13,11 @@ import { createRipples } from './ripples.js';//波紋3D処理
 import { createTrain } from './train.js';//列車3D処理
 import { createRain } from './weather_particles/rain.js';//雨3D処理
 import { createSnow } from './weather_particles/snow.js';//雪3D処理
+import { pickConversation } from './lines.js';//会話ログ
+import { createConversationPlayer } from './conversation.js';//会話処理
 
+//会話
+const talk = createConversationPlayer(hud);
 
 const env = createEnvironment();
 // 時間帯のパレットに、天気のフィルターをかけたもの
@@ -76,12 +80,16 @@ const hud = createHud();
 const fader = createPaletteFader(palette, applyPalette);
 env.start({
   onTick: (state) => hud.update(state),
-  onTimeChange: (state) => fader.fadeTo(palettes[state.timeOfDay]),
+  onTimeChange: (state) => {
+    fader.fadeTo(palettes[state.timeOfDay]);
+    talk.play(pickConversation(env.state));
+  },
   onWeatherChange: (state) => {
     hud.update(state);
     rain.setActive(state.weather === 'rain' || state.weather === 'thunder');
     snow.setActive(state.weather === 'snow');
     fader.fadeTo(targetPalette(state));
+    talk.play(pickConversation(env.state));
   },
 });
 hud.setMessage('銀河ステーション - 星の休息地');
