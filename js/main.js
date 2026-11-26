@@ -18,8 +18,9 @@ import { pickConversation } from './talks/line.js';//会話ログ
 import { createConversationPlayer } from './talks/conversation.js';//会話処理
 import { createSubtitleView } from './talks/subtitle-view.js'; //会話表示
 import { drawTicketFace } from './ticket/ticket-face.js';//チケット表面
-import { createTicket } from './ticket/ticket.js';//チケット3D処理
+import { createTicket } from './ticket/ticket.js';//チケット3D呼び出し処理
 import { showTicketCard } from './ticket/ticket-card.js';//チケット2D処理
+import { createTicketButton } from './ticket/ticket-button.js';//チケット保存処理
 
 
 // ===== 状態とパレット =====
@@ -137,14 +138,26 @@ renderer.setAnimationLoop(animate);
 
 // チケット
 let ticket = null;
+const ticketButton = createTicketButton(() => startTicket());
+ticketButton.setEnabled(false);
+ready.then(() => ticketButton.setEnabled(true)); // ロードが終わったら押せるように
+
 async function startTicket() {
-  if (ticket) return; // 2枚同時に出さない
+  if (ticket) return;                 // 2枚同時に出さない
+  ticketButton.setEnabled(false);
+
   ticket = await createTicket(env.state, {
     onLanded: () => {
-      showTicketCard(ticket.canvas);                         // くっきり切符をふわっと出す
-      setTimeout(() => (ticket.object.visible = false), 250); // 少し重なってから3Dを隠す
+      showTicketCard(ticket.canvas, {
+        onClose: () => {               // 閉じたら片付けて、また押せるように
+          scene.remove(ticket.object);
+          ticket.dispose();
+          ticket = null;
+          ticketButton.setEnabled(true);
+        },
+      });
+      setTimeout(() => (ticket.object.visible = false), 250);
     },
   });
   scene.add(ticket.object);
 }
-ready.then(() => setTimeout(startTicket, 3000)); // 確認用：ロードが終わって3秒後に降ってくる

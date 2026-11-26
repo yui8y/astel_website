@@ -22,3 +22,48 @@
 @media (prefers-reduced-motion: reduce) {
   .ticket-card { transition: none; }
 }
+
+/* 呼び出しボタン（右上） */
+.ticket-button {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 4;
+  padding: 6px 14px;
+  font-family: 'DotGothic16', monospace;
+  font-size: 16px;
+  letter-spacing: 0.2em;
+  color: var(--hud-color);
+  background: rgba(244, 234, 214, 0.7);   /* 切符の紙の色を、少し透かして */
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+.ticket-button:hover { background: rgba(244, 234, 214, 0.95); }
+.ticket-button:disabled { opacity: 0.3; cursor: default; }
+
+/* 2Dの切符の下のボタン */
+.ticket-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+.ticket-action {
+  padding: 6px 20px;
+  font-family: 'DotGothic16', monospace;
+  font-size: 16px;
+  /*letter-spacing: 0.2em;*/
+  color: #3a3022;
+  background: #f4ead6;
+  border: none;
+  cursor: pointer;
+}
+.ticket-action:hover { background: #fffaf0; }
+
+/* キーボードで選んでいるときに、どれを選んでいるか分かるように */
+.ticket-button:focus-visible,
+.ticket-action:focus-visible {
+  outline: 2px solid var(--hud-color);
+  outline-offset: 2px;
+}
