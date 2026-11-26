@@ -16,7 +16,8 @@ import { createRain } from './weather_particles/rain.js';//雨3D処理
 import { createSnow } from './weather_particles/snow.js';//雪3D処理
 import { pickConversation } from './talks/line.js';//会話ログ
 import { createConversationPlayer } from './talks/conversation.js';//会話処理
-import { createSubtitleView } from './talks/subtitle-view.js'; // 会話表示
+import { createSubtitleView } from './talks/subtitle-view.js'; //会話表示
+import { drawTicketFace } from './ticket/ticket-face.js';//チケット
 
 
 const env = createEnvironment();
@@ -100,7 +101,11 @@ env.start({
 hud.setMessage('銀河ステーション - 星の休息地');
 talk.play(pickConversation(env.state));
 
-
+//チケット作成
+drawTicketFace(env.state).then((canvas) => {
+  canvas.style.cssText = 'position:fixed; top:16px; left:16px; z-index:20;';
+  document.body.appendChild(canvas);
+});
 
 // デバッグ：T キーで時間帯を順番に切り替える
 /*const ORDER = ['dawn', 'day', 'dusk', 'night'];

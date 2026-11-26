@@ -3,7 +3,7 @@ const NAMES = { astel: 'アステル', outis: 'ウーティス' };
 // ms ミリ秒待つ
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export function createConversationPlayer(view) {
+export function createConversationPlayer(view, ready = Promise.resolve()) {
   let playing = 0; // 今流している会話の番号
 
   async function play(conversation) {
