@@ -17,5 +17,9 @@ export async function finishLoading() {
   if (shown < MIN_SHOW_MS) await sleep(MIN_SHOW_MS - shown);
 
   el.classList.add('is-hidden');
-  el.addEventListener('transitionend', () => el.remove(), { once: true }); // 消え終わったら片付ける
+  await Promise.race([
+    new Promise((resolve) => el.addEventListener('transitionend', resolve, { once: true })),
+    sleep(1200),
+  ]);
+  el.remove();
 }

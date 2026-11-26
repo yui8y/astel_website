@@ -79,8 +79,9 @@ scene.add(train.object);
 const hud = createHud();
 const fader = createPaletteFader(palette, applyPalette);
 //会話
+const ready = finishLoading();
 const subtitles = createSubtitleView();
-const talk = createConversationPlayer(subtitles);
+const talk = createConversationPlayer(subtitles, ready);
 
 env.start({
   onTick: (state) => hud.update(state),
@@ -125,5 +126,3 @@ function animate(timestamp) {
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
-
-finishLoading();

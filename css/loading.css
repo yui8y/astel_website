@@ -20,9 +20,9 @@
 .loading-star {
   width: 12px;
   height: 12px;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  animation: twinkle 1.6s ease-in-out infinite;  /* HUDの星と同じ瞬き */
+  background: currentColor;
+  clip-path: path('M6 0 Q7 5 12 6 Q7 7 6 12 Q5 7 0 6 Q5 5 6 0 Z');
+  animation: twinkle 4s ease-in-out infinite;
 }
 
 .loading-text {
@@ -34,4 +34,8 @@
 @media (prefers-reduced-motion: reduce) {
   .loading { transition: none; }
   .loading-star { animation: none; }
+}
+
+.subtitle-rest {
+  visibility: hidden; /* 場所はとるけど、見えない */
 }
