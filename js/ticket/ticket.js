@@ -20,7 +20,7 @@ function fitDistance(camera) {
   return Math.max(byHeight, byWidth); // 遠い方＝どっちにも収まる
 }
 
-export async function createTicket(state, { onLanded } = {}) {
+export async function createTicket(state, { onLanded, camera } = {}) {
   const canvas = await drawTicketFace(state);
 
   // 今の画面に合わせて、止まる位置と出発の位置を決める
@@ -42,7 +42,7 @@ export async function createTicket(state, { onLanded } = {}) {
     new THREE.BoxGeometry(SIZE.w, SIZE.h, SIZE.d),
     [edge, edge, edge, edge, front, back]
   );
-  mesh.position.set(START.x, START.y, START.z);
+  mesh.position.set(start.x, start.y, start.z);
 
     let phase = 'flying';
   let t = 0;
@@ -63,9 +63,9 @@ export async function createTicket(state, { onLanded } = {}) {
       const wave = 1 - e; // ひらひらの強さ（着く頃には0）
 
       mesh.position.set(
-        lerp(START.x, END.x, e) + Math.sin(t * 1.3) * 0.3 * wave,
-        lerp(START.y, END.y, e) + Math.sin(p * Math.PI) * ARC + Math.sin(t * 2.0) * 0.15 * wave,
-        lerp(START.z, END.z, e)
+        lerp(start.x, end.x, e) + Math.sin(t * 1.3) * 0.3 * wave,
+        lerp(start.y, end.y, e) + Math.sin(p * Math.PI) * ARC + Math.sin(t * 2.0) * 0.15 * wave,
+        lerp(start.z, end.z, e)
       );
 
       mesh.rotation.x = LIE + Math.sin(t * 2.3) * 0.25;                 // 横たわったまま、ぱたぱた
@@ -88,7 +88,7 @@ export async function createTicket(state, { onLanded } = {}) {
       const p = Math.min(t / RISE_TIME, 1);
       const e = easeInOut(p);
 
-      mesh.position.set(lerp(from.x, END.x, e), lerp(from.y, END.y, e), lerp(from.z, END.z, e));
+      mesh.position.set(lerp(from.x, end.x, e), lerp(from.y, end.y, e), lerp(from.z, end.z, e));
       mesh.rotation.set(lerp(from.rx, 0, e), lerp(from.ry, 0, e), lerp(from.rz, 0, e));
 
       if (p >= 1) {

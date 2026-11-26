@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 
-const PIXEL_SIZE = 4; // 1ドットを何ピクセル分の大きさにするか
+//const PIXEL_SIZE = 4; // 1ドットを何ピクセル分の大きさにするか
 
 // 画面サイズに合わせて、描く紙の大きさを決める（このファイルの中だけで使う）
 function fitToWindow(renderer) {
   renderer.setSize(
-    Math.floor(window.innerWidth / PIXEL_SIZE),
-    Math.floor(window.innerHeight / PIXEL_SIZE),
+    Math.floor(window.innerWidth / pixelSize()),
+    Math.floor(window.innerHeight / pixelSize()),
     false
   );
 }
