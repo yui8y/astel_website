@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { drawTicketFace } from './ticket-face.js';
 
 const SIZE = { w: 1.875, h: 1, d: 0.02 };
-const START_Y = 4.5;     // ここから落ち始める（画面の上の外）
-const LAND_Y = 0;        // ここで止まる（画面の真ん中）
-const DISTANCE_Z = 2.5;  // カメラからの位置
-const FALL_SPEED = 0.9;  // 落ちる速さ
-const SETTLE = 4;        // 止まるときの「吸い寄せられる強さ」
+const START = { x: -5, y: 2.2, z: 1 };  // 左上の、画面の外。少し奥から
+const END   = { x: 0,  y: 0,   z: 2.5 }; // 真ん中（2Dの切符と重なる位置）
+const FLIGHT_TIME = 3.5; // 飛んでくるのにかかる秒数
+const ARC = 0.5;         // 道すじのふくらみ（ふわっと浮き上がる高さ）
+const SETTLE = 4;
 
 export async function createTicket(state, { onLanded } = {}) {
   const canvas = await drawTicketFace(state);
@@ -25,7 +25,7 @@ export async function createTicket(state, { onLanded } = {}) {
     new THREE.BoxGeometry(SIZE.w, SIZE.h, SIZE.d),
     [edge, edge, edge, edge, front, back]
   );
-  mesh.position.set(0, START_Y, DISTANCE_Z);
+    mesh.position.set(START.x, START.y, START.z);
 
   let phase = 'falling';
   let t = 0;
@@ -36,13 +36,28 @@ export async function createTicket(state, { onLanded } = {}) {
     t += delta;
 
     if (phase === 'falling') {
-      mesh.position.y -= FALL_SPEED * delta;
-      mesh.position.x = Math.sin(t * 1.3) * 0.8;  // 左右に揺れる
-      mesh.rotation.z = Math.cos(t * 1.3) * 0.5;  // 揺れに合わせて傾く
-      mesh.rotation.x = Math.sin(t * 2.3) * 0.7;  // 前後にぱたぱた
-      mesh.rotation.y = Math.sin(t * 0.9) * 1.2;  // ゆっくりねじれる
+      const p = Math.min(t / FLIGHT_TIME, 1);  // 進み具合 0 → 1
+      const e = 1 - Math.pow(1 - p, 3);        // だんだんゆっくり（イーズアウト）
+      const wave = 1 - e;                      // ひらひらの強さ（着く頃には0）
 
-      if (mesh.position.y <= LAND_Y + 0.6) phase = 'landing'; // 近づいたら、止まる動きへ
+      // ① 道すじ：左上 → 真ん中（途中で少しふわっと浮く）
+      const baseX = START.x + (END.x - START.x) * e;
+      const baseY = START.y + (END.y - START.y) * e + Math.sin(p * Math.PI) * ARC;
+      const baseZ = START.z + (END.z - START.z) * e;
+
+      // ② ひらひら（真ん中に近づくほど小さく）
+      mesh.position.set(
+        baseX + Math.sin(t * 1.3) * 0.3 * wave,
+        baseY + Math.sin(t * 2.0) * 0.15 * wave,
+        baseZ
+      );
+      mesh.rotation.z = Math.cos(t * 1.3) * 0.5 * wave;
+      mesh.rotation.x = Math.sin(t * 2.3) * 0.7 * wave;
+
+      // ③ くるっと1回転して、着く頃に正面へ
+      mesh.rotation.y = wave * Math.PI * 2;
+
+      if (p >= 1) phase = 'landing'; // 飛び終わったら、仕上げの「止まる」へ
     }
 
     else if (phase === 'landing') {

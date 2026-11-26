@@ -22,6 +22,7 @@ import { createTicket } from './ticket/ticket.js';//チケット3D処理
 import { showTicketCard } from './ticket/ticket-card.js';//チケット2D処理
 
 
+// ===== 状態とパレット =====
 const env = createEnvironment();
 // 時間帯のパレットに、天気のフィルターをかけたもの
 function targetPalette(state) {
@@ -32,6 +33,7 @@ const palette = targetPalette(env.state);
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(palette.horizon, 30, 400); // 水面より先に作る
 
+// ===== 舞台・カメラ・ライト =====
 const camera = createCamera();
 const renderer = createRenderer();
 handleResize(renderer, camera);
@@ -43,6 +45,8 @@ scene.add(light);
 const ambient = new THREE.AmbientLight(palette.ambient, 1.2);
 scene.add(ambient);
 
+
+// ===== 景色（空・海・波紋・天気・列車） =====
 // 空
 const sky = createSky(palette);
 scene.add(sky);
@@ -78,21 +82,6 @@ function applyPalette(p) {
 const train = createTrain();
 scene.add(train.object);
 
-// チケット
-// 記念切符
-let ticket = null;
-async function startTicket() {
-  if (ticket) return; // 2枚同時に出さない
-  ticket = await createTicket(env.state, {
-    onLanded: () => {
-      showTicketCard(ticket.canvas);                         // くっきり切符をふわっと出す
-      setTimeout(() => (ticket.object.visible = false), 250); // 少し重なってから3Dを隠す
-    },
-  });
-  scene.add(ticket.object);
-}
-ready.then(() => setTimeout(startTicket, 3000)); // 確認用：ロードが終わって3秒後に降ってくる
-
 // 掲示板作成
 const hud = createHud();
 const fader = createPaletteFader(palette, applyPalette);
@@ -101,6 +90,7 @@ const ready = finishLoading();
 const subtitles = createSubtitleView();
 const talk = createConversationPlayer(subtitles, ready);
 
+// ===== 見張り開始（env.start） =====
 env.start({
   onTick: (state) => hud.update(state),
   onTimeChange: (state) => {
@@ -127,7 +117,8 @@ window.addEventListener('keydown', (e) => {
   fader.fadeTo(palettes[ORDER[debugIndex]]);
 });*/
 
-// アニメーション
+
+// ===== アニメーション（必ず最後） =====
 const timer = new Timer();
 function animate(timestamp) {
   timer.update(timestamp);          // ← 毎フレーム最初に呼ぶ！
@@ -143,3 +134,17 @@ function animate(timestamp) {
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
+
+// チケット
+let ticket = null;
+async function startTicket() {
+  if (ticket) return; // 2枚同時に出さない
+  ticket = await createTicket(env.state, {
+    onLanded: () => {
+      showTicketCard(ticket.canvas);                         // くっきり切符をふわっと出す
+      setTimeout(() => (ticket.object.visible = false), 250); // 少し重なってから3Dを隠す
+    },
+  });
+  scene.add(ticket.object);
+}
+ready.then(() => setTimeout(startTicket, 3000)); // 確認用：ロードが終わって3秒後に降ってくる
