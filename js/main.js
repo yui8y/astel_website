@@ -77,6 +77,10 @@ scene.add(train.object);
 // 掲示板作成
 const hud = createHud();
 const fader = createPaletteFader(palette, applyPalette);
+//会話
+const subtitles = createSubtitleView();
+const talk = createConversationPlayer(subtitles);
+
 env.start({
   onTick: (state) => hud.update(state),
   onTimeChange: (state) => {
@@ -92,10 +96,9 @@ env.start({
   },
 });
 hud.setMessage('銀河ステーション - 星の休息地');
+talk.play(pickConversation(env.state));
 
-//会話
-const subtitles = createSubtitleView();
-const talk = createConversationPlayer(subtitles);
+
 
 // デバッグ：T キーで時間帯を順番に切り替える
 /*const ORDER = ['dawn', 'day', 'dusk', 'night'];

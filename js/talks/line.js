@@ -22,3 +22,15 @@ export const conversations = [
       ],
   },
 ];
+
+// 今の状態に合う会話を1つ選ぶ
+export function pickConversation(state) {
+  const matches = conversations.filter((c) =>
+    Object.entries(c.when).every(([key, value]) => state[key] === value)
+  );
+  if (matches.length === 0) return null;
+
+  const best = Math.max(...matches.map((c) => Object.keys(c.when).length));
+  const top = matches.filter((c) => Object.keys(c.when).length === best);
+  return top[Math.floor(Math.random() * top.length)];
+}
