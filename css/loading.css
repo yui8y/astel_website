@@ -1,0 +1,37 @@
+.loading {
+  position: fixed;
+  inset: 0;                              /* 画面いっぱい（上下左右0） */
+  z-index: 10;                           /* 一番手前に */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #353452;                   /* 朝焼けの空に近い、淡い色 */
+  font-family: 'DotGothic16', monospace;
+  color: #fffff0;
+  transition: opacity 1s ease;
+}
+.loading.is-hidden {
+  opacity: 0;
+  pointer-events: none;                  /* 消えかけの間も、クリックを邪魔しない */
+}
+
+.loading-star {
+  width: 12px;
+  height: 12px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  animation: twinkle 1.6s ease-in-out infinite;  /* HUDの星と同じ瞬き */
+}
+
+.loading-text {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: 0.3em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading { transition: none; }
+  .loading-star { animation: none; }
+}

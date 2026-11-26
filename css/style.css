@@ -32,10 +32,10 @@ canvas {
 .hud-row + .hud-row { margin-top: 4px; }            /* 2段目からは少し間をあける */
 
 .hud-star {
-  width: 8px;
-  height: 8px;
-  border: 1px solid currentColor;                   /* 文字と同じ色の線 */
-  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  clip-path: path('M6 0 Q7 5 12 6 Q7 7 6 12 Q5 7 0 6 Q5 5 6 0 Z');
   animation: twinkle 4s ease-in-out infinite;
 }
 

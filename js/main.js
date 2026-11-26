@@ -1,6 +1,7 @@
 //GameManager
 import * as THREE from 'three';
 import { Timer } from 'three/addons/misc/Timer.js';
+import { finishLoading } from './load/loading.js'; // ロード画面
 import { createRenderer, createCamera, handleResize } from './renderer.js';//カメラ・映写機
 import { createEnvironment } from './environment.js';//時刻・天気呼び出し
 import { createSky, createStars, paintSky } from './sky.js';//空処理
@@ -124,3 +125,5 @@ function animate(timestamp) {
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
+
+finishLoading();
