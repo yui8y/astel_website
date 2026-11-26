@@ -1,4 +1,4 @@
-import { TIME_LABELS, SEASON_LABELS, WEATHER_LABELS } from '../labels.js';
+import { TIME_LABELS, SEASON_LABELS, WEATHER_LABELS } from '../label/labels.js';
 
 const W = 480;   // 切符の絵の横幅（ピクセル）
 const H = 256;   // 縦幅
