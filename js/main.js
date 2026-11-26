@@ -17,7 +17,9 @@ import { createSnow } from './weather_particles/snow.js';//雪3D処理
 import { pickConversation } from './talks/line.js';//会話ログ
 import { createConversationPlayer } from './talks/conversation.js';//会話処理
 import { createSubtitleView } from './talks/subtitle-view.js'; //会話表示
-import { drawTicketFace } from './ticket/ticket-face.js';//チケット
+import { drawTicketFace } from './ticket/ticket-face.js';//チケット表面
+import { createTicket } from './ticket/ticket.js';//チケット3D処理
+import { showTicketCard } from './ticket/ticket-card.js';//チケット2D処理
 
 
 const env = createEnvironment();
@@ -76,6 +78,21 @@ function applyPalette(p) {
 const train = createTrain();
 scene.add(train.object);
 
+// チケット
+// 記念切符
+let ticket = null;
+async function startTicket() {
+  if (ticket) return; // 2枚同時に出さない
+  ticket = await createTicket(env.state, {
+    onLanded: () => {
+      showTicketCard(ticket.canvas);                         // くっきり切符をふわっと出す
+      setTimeout(() => (ticket.object.visible = false), 250); // 少し重なってから3Dを隠す
+    },
+  });
+  scene.add(ticket.object);
+}
+ready.then(() => setTimeout(startTicket, 3000)); // 確認用：ロードが終わって3秒後に降ってくる
+
 // 掲示板作成
 const hud = createHud();
 const fader = createPaletteFader(palette, applyPalette);
@@ -101,12 +118,6 @@ env.start({
 hud.setMessage('銀河ステーション - 星の休息地');
 talk.play(pickConversation(env.state));
 
-//チケット作成
-drawTicketFace(env.state).then((canvas) => {
-  canvas.style.cssText = 'position:fixed; top:16px; left:16px; z-index:20;';
-  document.body.appendChild(canvas);
-});
-
 // デバッグ：T キーで時間帯を順番に切り替える
 /*const ORDER = ['dawn', 'day', 'dusk', 'night'];
 let debugIndex = ORDER.indexOf(env.state.timeOfDay);
@@ -128,6 +139,7 @@ function animate(timestamp) {
   fader.update(delta);
   snow.update(delta);
   rain.update(delta);
+  if (ticket) ticket.update(delta);
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
