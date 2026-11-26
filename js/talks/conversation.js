@@ -15,6 +15,7 @@ export function createConversationPlayer(hud) {
       view.showLine(line);
       await sleep(1500 + line.text.length * 120); // 長いセリフほど長く表示
     }
+    if (myNumber === playing) view.clear();
   }
 
   return { play };

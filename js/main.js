@@ -13,11 +13,10 @@ import { createRipples } from './ripples.js';//波紋3D処理
 import { createTrain } from './train.js';//列車3D処理
 import { createRain } from './weather_particles/rain.js';//雨3D処理
 import { createSnow } from './weather_particles/snow.js';//雪3D処理
-import { pickConversation } from './lines.js';//会話ログ
-import { createConversationPlayer } from './conversation.js';//会話処理
+import { pickConversation } from './talks/line.js';//会話ログ
+import { createConversationPlayer } from './talks/conversation.js';//会話処理
+import { createSubtitleView } from './talks/subtitle-view.js'; // 会話表示
 
-//会話
-const talk = createConversationPlayer(hud);
 
 const env = createEnvironment();
 // 時間帯のパレットに、天気のフィルターをかけたもの
@@ -81,7 +80,7 @@ const fader = createPaletteFader(palette, applyPalette);
 env.start({
   onTick: (state) => hud.update(state),
   onTimeChange: (state) => {
-    fader.fadeTo(palettes[state.timeOfDay]);
+    fader.fadeTo(targetPalette(state));
     talk.play(pickConversation(env.state));
   },
   onWeatherChange: (state) => {
@@ -93,6 +92,11 @@ env.start({
   },
 });
 hud.setMessage('銀河ステーション - 星の休息地');
+
+//会話
+const subtitles = createSubtitleView();
+const talk = createConversationPlayer(subtitles);
+
 // デバッグ：T キーで時間帯を順番に切り替える
 /*const ORDER = ['dawn', 'day', 'dusk', 'night'];
 let debugIndex = ORDER.indexOf(env.state.timeOfDay);
