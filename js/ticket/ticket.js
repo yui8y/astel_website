@@ -20,7 +20,7 @@ function fitDistance(camera) {
   return Math.max(byHeight, byWidth); // 遠い方＝どっちにも収まる
 }
 
-export async function createTicket(state, { onLanded, camera } = {}) {
+export async function createTicket(state, { onLanded, camera, instant = false } = {}) {
   const canvas = await drawTicketFace(state);
 
   // 今の画面に合わせて、止まる位置と出発の位置を決める
@@ -44,7 +44,14 @@ export async function createTicket(state, { onLanded, camera } = {}) {
   );
   mesh.position.set(start.x, start.y, start.z);
 
-    let phase = 'flying';
+  let phase = 'flying';
+    // すぐ着地した状態にする（舞う演出をとばす）
+  if (instant) {
+    mesh.position.set(end.x, end.y, end.z);
+    mesh.visible = false;
+    phase = 'done';
+  }
+  
   let t = 0;
   let from = null; // 起き上がり始めたときの姿勢を覚えておく
 

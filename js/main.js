@@ -131,28 +131,34 @@ async function startTicket() {
   ticketButton.setEnabled(false);
 
   const today = getTodayTicket();
-  const isNew = !today;                         // 今日初めて受け取る？
-  const data = today ?? issueTicket(env.state); // まだなら発行、受け取り済みならその記録
-  if (isNew) ticketButton.setLabel('切符発行');
+  const isNew = !today;
+  const data = today ?? issueTicket(env.state);
+  if (isNew) ticketButton.setLabel('切符確認');
+
+  // 2Dの切符を出す（1回目は着地したとき、2回目以降はすぐ）
+  function showCard() {
+    ticketCard = showTicketCard(ticket.canvas, {
+      rect: ticket.getScreenRect(camera),
+      onClose: () => {
+        scene.remove(ticket.object);
+        ticket.dispose();
+        ticket = null;
+        ticketCard = null;
+        ticketButton.setEnabled(true);
+        if (isNew) talk.play(pickConversation({ ...env.state, event: 'ticket', count: data.count }));
+      },
+    });
+    setTimeout(() => (ticket.object.visible = false), 250);
+  }
 
   ticket = await createTicket(toTicketState(data), {
     camera,
-    onLanded: () => {
-      ticketCard = showTicketCard(ticket.canvas, {     // ← 返ってきたものを覚える
-        rect: ticket.getScreenRect(camera),
-        onClose: () => {
-          scene.remove(ticket.object);
-          ticket.dispose();
-          ticket = null;
-          ticketCard = null;
-          ticketButton.setEnabled(true);
-          if (isNew) talk.play(pickConversation({ ...env.state, event: 'ticket', count: data.count }));
-        },
-      });
-      setTimeout(() => (ticket.object.visible = false), 250);
-    },
+    instant: !isNew,     // 2回目以降は、舞う演出をとばす
+    onLanded: showCard,  // 1回目は、着地したら出す
   });
   scene.add(ticket.object);
+
+  if (!isNew) showCard(); // 2回目以降は、すぐ出す
 }
 
 // 画面の大きさが変わったら、切符を置き直す
