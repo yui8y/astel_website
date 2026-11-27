@@ -18,15 +18,17 @@ function box(w, h, d, color, x, y, z) {
 
 // 並べ方（x, z, 回転）
 const LAYOUTS = {
-  wide: {                               // パソコン：横一列
+  wide: {
     lantern: [-1.3, -0.55, 0],
     astel:   [-0.15, 0.25, 0.12],
-    outis:   [0.85, 0.1, -0.08],
+    outis:   [0.85, 0.1, -0.08, 0.015],
+    ticketPunch: [1.6, 0.65, 0.5],
   },
-  tall: {                               // スマホ：奥から手前へ縦に
-    lantern: [-0.25, -0.95, 0],
+  tall: {
+    lantern: [-0.9, -0.95, 0],
     astel:   [-0.3, 0.05, 0.08],
-    outis:   [0.3, 0.75, -0.1],
+    outis:   [0.3, 0.75, -0.1, 0.045],
+    ticketPunch: [1.6, 0.65, 0.5, 0.05],
   },
 };
 
@@ -84,7 +86,9 @@ export function createDesk() {
   place(bookStack(), -1.55, 0.6, 0.3);
   place(inkwell(), 0.3, -0.75);
   place(teacup(), 1.6, 0.65, 0.5);
-  place(ticketPunch(), -0.65, -0.6, 0.8);  // ランタンのそば
+  const ticketPunch = ticketPunch();
+  ticketPunch.object.position.set(-0.65, -0.6, 0.8);
+  group.add(ticketPunch.object);
 
   // ===== 壁の星図（本棚の上） =====
   const frame = starFrame();
@@ -126,14 +130,16 @@ export function createDesk() {
   // 並べ方を切り替える
   function setLayout(name) {
     const L = LAYOUTS[name];
-    const put = (obj, [x, z, ry]) => {
+    const put = (obj, [x, z, ry, y]) => {
       obj.position.x = x;
       obj.position.z = z;
       obj.rotation.y = ry;
+      if (y !== undefined) obj.position.y = y; // 高さの指定があれば変える
     };
     put(lantern.object, L.lantern);
     put(astelFile, L.astel);
     put(outisFile, L.outis);
+    put(ticketPunch.object, L.ticketPunch);
   }
 
     return { object: group, files: { astel: astelFile, outis: outisFile }, update, setLayout };

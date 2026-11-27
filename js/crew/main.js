@@ -31,7 +31,7 @@ const bases = {
     lookFrom: new THREE.Vector3(0, 0.5, -0.5),
     to:       new THREE.Vector3(0, 1.9, 2.0),
     lookTo:   new THREE.Vector3(0.3, 0.3, 0.1),
-    width: 3.4,                                    // 必ず見せる幅
+    width: 3.0,
     fogNear: 3.5, fogFar: 9,
   },
   tall: {                                          // スマホ：少し上から見下ろす
@@ -53,7 +53,6 @@ const view = createViewFitter(camera, scene, {
 
 // ===== 机に向かうカメラ =====
 const intro = createCameraIntro(camera, { ...view, duration: 2.8 });
-scene.fog = new THREE.Fog(0x15111c, base.fogNear, base.fogFar);
 
 // ===== アニメーション（必ず最後） =====
 const timer = new Timer();
