@@ -132,3 +132,19 @@ canvas {
 @media (prefers-reduced-motion: reduce) {
   .subtitle-text { transition: none; }
 }
+
+.crew-link {
+  position: fixed;
+  top: 64px;
+  right: 24px;
+  z-index: 4;
+  padding: 6px 14px;
+  font-family: 'DotGothic16', monospace;
+  font-size: 16px;
+  letter-spacing: 0.2em;
+  color: var(--hud-color);
+  background: rgba(244, 234, 214, 0.7);
+  text-decoration: none;
+}
+.crew-link:hover { background: rgba(244, 234, 214, 0.95); }
+.crew-link:focus-visible { outline: 2px solid var(--hud-color); outline-offset: 2px; }
