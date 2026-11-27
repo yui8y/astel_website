@@ -27,6 +27,20 @@ export const conversations = [
       { who: 'astel', text: '切符。なくさないでね' },
     ],
   },
+    {
+    when: {},
+    lines: [
+      { who: 'astel', text: 'ウー、今日の空、すこしにじんでる' },
+      { who: 'outis', text: '……天気のせいだろう。風邪を引く前に戻るように。' },
+    ],
+  },
+  {
+    when: {},
+    lines: [
+      { who: 'outis', text: 'また持ち場を離れていたのか。' },
+      { who: 'astel', text: 'ほしのこえ、きいてた' },
+    ],
+  },
 ];
 
 // 今の状態に合う会話を1つ選ぶ

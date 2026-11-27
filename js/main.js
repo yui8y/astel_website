@@ -91,27 +91,30 @@ const fader = createPaletteFader(palette, applyPalette);
 const ready = finishLoading();
 const subtitles = createSubtitleView();
 const talk = createConversationPlayer(subtitles, ready);
+// 車内放送を頼んで、だめなら固定セリフで話す
+function speak(state) {
+  fetchBroadcast(state).then((conversation) => {
+    talk.play(conversation ?? pickConversation(state));
+  });
+}
 
 // ===== 見張り開始（env.start） =====
 env.start({
   onTick: (state) => hud.update(state),
   onTimeChange: (state) => {
     fader.fadeTo(targetPalette(state));
-    talk.play(pickConversation(env.state));
+    speak(state);
   },
   onWeatherChange: (state) => {
     hud.update(state);
     rain.setActive(state.weather === 'rain' || state.weather === 'thunder');
     snow.setActive(state.weather === 'snow');
     fader.fadeTo(targetPalette(state));
-    talk.play(pickConversation(env.state));
+    speak(state);
   },
 });
 hud.setMessage('銀河ステーション - 星の休息地');
-fetchBroadcast(env.state).then((conversation) => {
-  talk.play(conversation ?? pickConversation(env.state)); // だめなら固定セリフ
-});
-
+speak(env.state);    
 // デバッグ：T キーで時間帯を順番に切り替える
 /*const ORDER = ['dawn', 'day', 'dusk', 'night'];
 let debugIndex = ORDER.indexOf(env.state.timeOfDay);
@@ -148,7 +151,7 @@ async function startTicket() {
         ticket = null;
         ticketCard = null;
         ticketButton.setEnabled(true);
-        if (isNew) talk.play(pickConversation({ ...env.state, event: 'ticket', count: data.count }));
+        if (isNew) speak({ ...env.state, event: 'ticket', count: data.count });
       },
     });
     setTimeout(() => (ticket.object.visible = false), 250);
