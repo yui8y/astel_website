@@ -31,12 +31,13 @@ export function createDesk() {
   // ===== 本棚（壁ぎわ） =====
   const shelf = createBookshelf({ seed: 12 });
   shelf.position.set(0, -1.25, -2.25); // 床の高さ、壁の手前
-  scene.add(shelf);
+  group.add(shelf);
 
   const wall = new THREE.Mesh(
     new THREE.PlaneGeometry(20, 10),
     new THREE.MeshStandardMaterial({ map: wallpaperTexture(), flatShading: true })
   );
+  wall.position.set(0, 3, -2.5);
   group.add(wall);
 
   // 机の材質（木目）
@@ -55,10 +56,6 @@ export function createDesk() {
   lantern.object.position.set(-1.3, 0, -0.55);
   lantern.object.scale.setScalar(1.6); // 少し大きめに
   group.add(lantern.object);
-
-  const light = new THREE.PointLight(0xffb86b, 8, 6, 2); // 色, 明るさ, 届く距離, 弱まり方
-  light.position.set(-1.3, 0.8, -0.6);
-  group.add(light);
 
   // ===== 二人のファイル =====
   const astelFile = box(0.9, 0.03, 1.2, 0x3c4a6b, -0.15, 0.015, 0.25);
