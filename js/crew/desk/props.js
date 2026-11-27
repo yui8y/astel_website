@@ -37,21 +37,6 @@ export function inkwell() {
   return g;
 }
 
-// ===== 散らばった紙 =====
-export function papers() {
-  const g = new THREE.Group();
-  const sheets = [[0, 0, 0.2], [0.15, 0.05, -0.4], [-0.1, 0.12, 0.6]]; // x, z, 回転
-  sheets.forEach(([x, z, r], i) => {
-    const sheet = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.7), mat(i % 2 ? 0xe9dfc8 : 0xd8ccb0));
-    sheet.rotation.x = -Math.PI / 2;
-    sheet.rotation.z = r;
-    sheet.position.set(x, 0.001 * (i + 1), z); // ほんの少しずつ高さを変えて、重なりのチラつきを防ぐ
-    sheet.receiveShadow = true;
-    g.add(sheet);
-  });
-  return g;
-}
-
 // ===== 紅茶のカップ =====
 export function teacup() {
   const g = new THREE.Group();
@@ -76,21 +61,6 @@ export function ticketPunch() {
     handle.rotation.y = side * 0.12; // 2本の持ち手を、少し開く
     g.add(handle);
   }
-  return g;
-}
-
-// ===== 懐中時計 =====
-export function pocketWatch() {
-  const g = new THREE.Group();
-  const brass = mat(0xb08d3c, { metalness: 0.6, roughness: 0.4 });
-  g.add(part(new THREE.CylinderGeometry(0.08, 0.08, 0.02, 12), brass, 0, 0.01, 0));
-  const face = new THREE.Mesh(new THREE.CircleGeometry(0.068, 12), mat(0xf1e8d2));
-  face.rotation.x = -Math.PI / 2;
-  face.position.y = 0.0205;
-  g.add(face);
-  const crown = part(new THREE.CylinderGeometry(0.012, 0.012, 0.03, 6), brass, 0, 0.01, 0.09);
-  crown.rotation.x = Math.PI / 2;
-  g.add(crown);
   return g;
 }
 

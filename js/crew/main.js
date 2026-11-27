@@ -15,6 +15,8 @@ const renderer = createRenderer();
 handleResize(renderer, camera);
 
 scene.add(new THREE.AmbientLight(0x3a3048, 1.0)); // 部屋全体のうっすらした明るさ
+// 上からは暖かい光、下からは暗い紫の照り返し
+scene.add(new THREE.HemisphereLight(0x8a6a4a, 0x1a1422, 0.5));
 
 // ===== 机 =====
 const desk = createDesk();

@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { woodTexture, wallpaperTexture } from './textures.js';
 import { createLantern } from './lantern.js';
 import { createBookshelf } from '../bookshelf.js';
-import { bookStack, inkwell, papers, teacup, ticketPunch, pocketWatch, starFrame } from './props.js';//小物
+import { bookStack, inkwell, teacup, ticketPunch, starFrame } from './props.js';//小物
+import { createWindow } from './background.js';
 
 
 // ローポリの材質を作る道具
@@ -17,6 +18,8 @@ function box(w, h, d, color, x, y, z) {
 
 export function createDesk() {
   const group = new THREE.Group();
+  const DESK_W = 6.0;
+  const DESK_D = 2.6;
 
   // ===== 部屋（暗がり） =====
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), mat(0x1c1622));
@@ -24,10 +27,14 @@ export function createDesk() {
   floor.position.y = -1.25;
   group.add(floor);
 
-  // ===== 本棚（壁ぎわ） =====
-  const shelf = createBookshelf({ seed: 12 });
-  shelf.position.set(0, -1.25, -2.25); // 床の高さ、壁の手前
-  group.add(shelf);
+  // ===== 本棚（左右） =====
+  const shelfLeft = createBookshelf({ width: 2.8, seed: 12 });
+  shelfLeft.position.set(-2.4, -1.25, -2.25);
+  group.add(shelfLeft);
+
+  const shelfRight = createBookshelf({ width: 2.8, seed: 34 }); // seed を変えると、別の並びになる
+  shelfRight.position.set(2.4, -1.25, -2.25);
+  group.add(shelfRight);
 
   const wall = new THREE.Mesh(
     new THREE.PlaneGeometry(20, 10),
@@ -36,12 +43,19 @@ export function createDesk() {
   wall.position.set(0, 3, -2.5);
   group.add(wall);
 
+  // ===== 窓（本棚のあいだ） =====
+  const win = createWindow({ width: 1.2, height: 1.5 });
+  win.position.set(0, 1.0, -2.47);
+  group.add(win);
+
   // 机の材質（木目）
-  const deskWood = new THREE.MeshStandardMaterial({ map: woodTexture({ repeatX: 2, repeatY: 1 }), flatShading: true });
-  const top = new THREE.Mesh(new THREE.BoxGeometry(4, 0.15, 2.4), deskWood);
+  const deskWood = new THREE.MeshStandardMaterial({ map: woodTexture({ repeatX: 3, repeatY: 1 }), flatShading: true });
+  const top = new THREE.Mesh(new THREE.BoxGeometry(DESK_W, 0.15, DESK_D), deskWood);
   top.position.y = -0.075;
   group.add(top);
-  for (const [x, z] of [[-1.85, -1.05], [1.85, -1.05], [-1.85, 1.05], [1.85, 1.05]]) {
+  const lx = DESK_W / 2 - 0.15;
+  const lz = DESK_D / 2 - 0.15;
+  for (const [x, z] of [[-lx, -lz], [lx, -lz], [-lx, lz], [lx, lz]]) {
     const leg = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.1, 0.15), deskWood);
     leg.position.set(x, -0.7, z);
     group.add(leg);
@@ -53,24 +67,16 @@ export function createDesk() {
     object.rotation.y = ry;
     group.add(object);
   };
-  place(papers(), 0.35, -0.25, 0.1);       // ファイルの下に、紙を散らす
   place(bookStack(), -1.55, 0.6, 0.3);
   place(inkwell(), 0.3, -0.75);
   place(teacup(), 1.6, 0.65, 0.5);
   place(ticketPunch(), -0.65, -0.6, 0.8);  // ランタンのそば
-  place(pocketWatch(), 0.45, 0.85);
 
   // ===== 壁の星図（本棚の上） =====
   const frame = starFrame();
   frame.position.set(0.8, 2.3, -2.46);
   group.add(frame);
 
-  // ===== 影を受ける・落とす =====
-  floor.receiveShadow = true;
-  wall.receiveShadow = true;
-  top.receiveShadow = true;
-  astelFile.castShadow = astelFile.receiveShadow = true;
-  outisFile.castShadow = outisFile.receiveShadow = true;
 
   // ===== ランタン =====
   const lantern = createLantern();
@@ -93,6 +99,12 @@ export function createDesk() {
   group.add(chart);
 
 
+  // ===== 影を受ける・落とす =====
+  floor.receiveShadow = true;
+  wall.receiveShadow = true;
+  top.receiveShadow = true;
+  astelFile.castShadow = astelFile.receiveShadow = true;
+  outisFile.castShadow = outisFile.receiveShadow = true;
   function update(delta) {
     lantern.update(delta);
   }
