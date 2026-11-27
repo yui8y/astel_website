@@ -9,6 +9,8 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x15111c); // 夜の書斎
 
 const camera = createCamera();
+camera.fov = 45;
+camera.updateProjectionMatrix(); // 視野角を変えたら、カメラに反映
 const renderer = createRenderer();
 handleResize(renderer, camera);
 
@@ -20,10 +22,10 @@ scene.add(desk.object);
 
 // ===== 机に向かうカメラ =====
 const intro = createCameraIntro(camera, {
-  from:     new THREE.Vector3(0, 2.6, 4.2),  // 部屋に入ったところ（立っている目線）
-  lookFrom: new THREE.Vector3(0, 0.8, -1),  // 机の奥を見ている
+  from:     new THREE.Vector3(0, 2.3, 2.0),  // 部屋に入ったところ（立っている目線）
+  lookFrom: new THREE.Vector3(0, 0.5, -0.5),  // 机の奥を見ている
   to:       new THREE.Vector3(0, 1.9, 2.0),  // 机の前に座ったところ
-  lookTo:   new THREE.Vector3(0.3, 0, 0.1), // 手元のファイルを見下ろす
+  lookTo:   new THREE.Vector3(0.3, 0.3, 0.1), // 手元のファイルを見下ろす
   duration: 2.8,
 });
 

@@ -38,7 +38,7 @@ export function createLantern() {
   const flame = add(new THREE.ConeGeometry(0.03, 0.09, 5), new THREE.MeshBasicMaterial({ color: 0xffd28a }), 0.2);
 
   // 灯り
-  const light = new THREE.PointLight(0xffb05a, 6, 5, 2);
+  const light = new THREE.PointLight(0xffb05a, 10, 8, 1.5);
   light.position.y = 0.22;
   group.add(light);
 
@@ -47,7 +47,7 @@ export function createLantern() {
   function update(delta) {
     t += delta;
     const flicker = Math.sin(t * 7) * 0.4 + Math.sin(t * 13) * 0.25;
-    light.intensity = 6 + flicker;
+    light.intensity = 10 + flicker;
     glass.material.emissiveIntensity = 0.6 + flicker * 0.1;
     flame.scale.y = 1 + Math.sin(t * 11) * 0.12;   // 炎が伸び縮み
   }
