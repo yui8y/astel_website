@@ -3,6 +3,7 @@ import { Timer } from 'three/addons/misc/Timer.js';
 import { createRenderer, createCamera, handleResize } from '../renderer.js';
 import { createDesk } from './desk/desk.js';
 import { createCameraIntro } from './camera-intro.js';
+import { createViewFitter } from './view-fitter.js';
 
 // ===== 舞台・カメラ =====
 const scene = new THREE.Scene();
@@ -23,13 +24,36 @@ const desk = createDesk();
 scene.add(desk.object);
 
 // ===== 机に向かうカメラ =====
-const intro = createCameraIntro(camera, {
-  from:     new THREE.Vector3(0, 2.3, 2.0),  // 部屋に入ったところ（立っている目線）
-  lookFrom: new THREE.Vector3(0, 0.5, -0.5),  // 机の奥を見ている
-  to:       new THREE.Vector3(0, 1.9, 2.0),  // 机の前に座ったところ
-  lookTo:   new THREE.Vector3(0.3, 0.3, 0.1), // 手元のファイルを見下ろす
-  duration: 2.8,
+// ===== カメラの位置（画面の形ごと） =====
+const bases = {
+  wide: {                                          // パソコン：机に向かって座る
+    from:     new THREE.Vector3(0, 2.3, 2.0),
+    lookFrom: new THREE.Vector3(0, 0.5, -0.5),
+    to:       new THREE.Vector3(0, 1.9, 2.0),
+    lookTo:   new THREE.Vector3(0.3, 0.3, 0.1),
+    width: 3.4,                                    // 必ず見せる幅
+    fogNear: 3.5, fogFar: 9,
+  },
+  tall: {                                          // スマホ：少し上から見下ろす
+    from:     new THREE.Vector3(0, 3.0, 2.0),
+    lookFrom: new THREE.Vector3(0, 0.3, -0.6),
+    to:       new THREE.Vector3(0, 2.8, 1.3),
+    lookTo:   new THREE.Vector3(0, 0, -0.05),
+    width: 1.6,                                    // 縦に並べたから、横は狭くていい
+    fogNear: 3.5, fogFar: 9,
+  },
+};
+scene.fog = new THREE.Fog(0x15111c, bases.wide.fogNear, bases.wide.fogFar);
+
+// ===== 画面の形に合わせる（机の並べ方も一緒に） =====
+const view = createViewFitter(camera, scene, {
+  bases,
+  onLayout: (mode) => desk.setLayout(mode),
 });
+
+// ===== 机に向かうカメラ =====
+const intro = createCameraIntro(camera, { ...view, duration: 2.8 });
+scene.fog = new THREE.Fog(0x15111c, base.fogNear, base.fogFar);
 
 // ===== アニメーション（必ず最後） =====
 const timer = new Timer();

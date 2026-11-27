@@ -16,6 +16,20 @@ function box(w, h, d, color, x, y, z) {
   return mesh;
 }
 
+// 並べ方（x, z, 回転）
+const LAYOUTS = {
+  wide: {                               // パソコン：横一列
+    lantern: [-1.3, -0.55, 0],
+    astel:   [-0.15, 0.25, 0.12],
+    outis:   [0.85, 0.1, -0.08],
+  },
+  tall: {                               // スマホ：奥から手前へ縦に
+    lantern: [-0.25, -0.95, 0],
+    astel:   [-0.3, 0.05, 0.08],
+    outis:   [0.3, 0.75, -0.1],
+  },
+};
+
 export function createDesk() {
   const group = new THREE.Group();
   const DESK_W = 6.0;
@@ -109,5 +123,18 @@ export function createDesk() {
     lantern.update(delta);
   }
 
-  return { object: group, files: { astel: astelFile, outis: outisFile }, update };
+  // 並べ方を切り替える
+  function setLayout(name) {
+    const L = LAYOUTS[name];
+    const put = (obj, [x, z, ry]) => {
+      obj.position.x = x;
+      obj.position.z = z;
+      obj.rotation.y = ry;
+    };
+    put(lantern.object, L.lantern);
+    put(astelFile, L.astel);
+    put(outisFile, L.outis);
+  }
+
+    return { object: group, files: { astel: astelFile, outis: outisFile }, update, setLayout };
 }
