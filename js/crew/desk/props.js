@@ -56,9 +56,10 @@ export function ticketPunch() {
   const g = new THREE.Group();
   const metal = mat(0x6d665c, { metalness: 0.6, roughness: 0.4 });
   g.add(part(new THREE.BoxGeometry(0.1, 0.03, 0.05), metal, 0, 0.03, 0)); // 頭
-  for (const side of [-1, 1]) {
-    const handle = part(new THREE.BoxGeometry(0.025, 0.02, 0.32), metal, side * 0.03, 0.02, 0.17);
-    handle.rotation.y = side * 0.12; // 2本の持ち手を、少し開く
+    for (const side of [-1, 1]) {
+    const y = side > 0 ? 0.024 : 0.02; // 片方だけ、ほんの少し高くして、重なりを分ける
+    const handle = part(new THREE.BoxGeometry(0.025, 0.02, 0.32), metal, side * 0.03, y, 0.17);
+    handle.rotation.y = side * 0.12;
     g.add(handle);
   }
   return g;
