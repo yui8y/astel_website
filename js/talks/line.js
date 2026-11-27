@@ -17,9 +17,15 @@ export const conversations = [
   {
     when: {},                       // いつでも（予備）
     lines: [
-        { who: 'astel', text: 'ウー、流星。よく見えるよ' },
-        { who: 'outis',  text: '……ああ、そうだな。' },
+        { who: 'astel', text: '今日の空気、きれい' },
+        { who: 'astel', text: '……ウー、まだこないのかな' },
       ],
+  },
+  {
+    when: { event: 'ticket' },
+    lines: [
+      { who: 'astel', text: '切符。なくさないでね' },
+    ],
   },
 ];
 

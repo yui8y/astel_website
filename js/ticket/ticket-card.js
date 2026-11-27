@@ -27,9 +27,15 @@ function download(canvas) {
 
 export function showTicketCard(canvas, { rect, onClose } = {}) {
   const card = make('div', 'ticket-card', document.body);
-  card.style.left = `${rect.left}px`;
-  card.style.top = `${rect.top}px`;
-  card.style.width = `${rect.width}px`;
+
+  // 位置と大きさを決める（最初と、画面の大きさが変わったときに使う）
+  function moveTo(r) {
+    card.style.left = `${r.left}px`;
+    card.style.top = `${r.top}px`;
+    card.style.width = `${r.width}px`;
+  }
+  moveTo(rect);
+
   card.appendChild(canvas);
 
   const actions = make('div', 'ticket-actions', card);
@@ -50,4 +56,6 @@ export function showTicketCard(canvas, { rect, onClose } = {}) {
   });
 
   requestAnimationFrame(() => card.classList.add('is-visible'));
+
+  return { moveTo };
 }

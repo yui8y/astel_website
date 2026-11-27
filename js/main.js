@@ -17,10 +17,10 @@ import { createSnow } from './weather_particles/snow.js';//雪3D処理
 import { pickConversation } from './talks/line.js';//会話ログ
 import { createConversationPlayer } from './talks/conversation.js';//会話処理
 import { createSubtitleView } from './talks/subtitle-view.js'; //会話表示
-import { drawTicketFace } from './ticket/ticket-face.js';//チケット表面
 import { createTicket } from './ticket/ticket.js';//チケット3D呼び出し処理
 import { showTicketCard } from './ticket/ticket-card.js';//チケット2D処理
 import { createTicketButton } from './ticket/ticket-button.js';//チケット保存処理
+import { getTodayTicket, issueTicket, toTicketState } from './ticket/ticket-store.js'; //チケット発行回数保存
 
 
 // ===== 状態とパレット =====
@@ -118,6 +118,50 @@ window.addEventListener('keydown', (e) => {
   fader.fadeTo(palettes[ORDER[debugIndex]]);
 });*/
 
+// チケット
+let ticket = null;
+let ticketCard = null;
+const ticketButton = createTicketButton(() => startTicket());
+ticketButton.setEnabled(false);
+if (getTodayTicket()) ticketButton.setLabel('切符確認');
+ready.then(() => ticketButton.setEnabled(true));
+
+async function startTicket() {
+  if (ticket) return;
+  ticketButton.setEnabled(false);
+
+  const today = getTodayTicket();
+  const isNew = !today;                         // 今日初めて受け取る？
+  const data = today ?? issueTicket(env.state); // まだなら発行、受け取り済みならその記録
+  if (isNew) ticketButton.setLabel('切符発行');
+
+  ticket = await createTicket(toTicketState(data), {
+    camera,
+    onLanded: () => {
+      ticketCard = showTicketCard(ticket.canvas, {     // ← 返ってきたものを覚える
+        rect: ticket.getScreenRect(camera),
+        onClose: () => {
+          scene.remove(ticket.object);
+          ticket.dispose();
+          ticket = null;
+          ticketCard = null;
+          ticketButton.setEnabled(true);
+          if (isNew) talk.play(pickConversation({ ...env.state, event: 'ticket', count: data.count }));
+        },
+      });
+      setTimeout(() => (ticket.object.visible = false), 250);
+    },
+  });
+  scene.add(ticket.object);
+}
+
+// 画面の大きさが変わったら、切符を置き直す
+window.addEventListener('resize', () => {
+  if (!ticket) return;                                    // 切符が出ていなければ何もしない
+  ticket.refit(camera);
+  if (ticketCard) ticketCard.moveTo(ticket.getScreenRect(camera));
+});
+
 
 // ===== アニメーション（必ず最後） =====
 const timer = new Timer();
@@ -135,32 +179,3 @@ function animate(timestamp) {
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
-
-// チケット
-let ticket = null;
-const ticketButton = createTicketButton(() => startTicket());
-ticketButton.setEnabled(false);
-ready.then(() => ticketButton.setEnabled(true)); // ロードが終わったら押せるように
-
-async function startTicket() {
-  if (ticket) return;                 // 2枚同時に出さない
-  ticketButton.setEnabled(false);
-
-  ticket = await createTicket(env.state, {
-    camera,                                         // ← カメラを渡す
-    onLanded: () => {
-      showTicketCard(ticket.canvas, {
-        rect: ticket.getScreenRect(camera),  
-        onClose: () => {               // 閉じたら片付けて、また押せるように
-          scene.remove(ticket.object);
-          ticket.dispose();
-          ticket = null;
-          ticketButton.setEnabled(true);
-        },
-      });
-      setTimeout(() => (ticket.object.visible = false), 250);
-    },
-  });
-  scene.add(ticket.object);
-}
-

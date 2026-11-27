@@ -106,6 +106,13 @@ export async function createTicket(state, { onLanded, camera } = {}) {
     back.dispose();
     texture.dispose();
   }
+    // 画面の大きさが変わったら、ちょうどいい距離に置き直す
+  function refit(camera) {
+    const z = camera.position.z - fitDistance(camera);
+    end.z = z;
+    start.z = z - 1.5;
+    if (phase === 'done') mesh.position.z = z; // 着地した後なら、その場で動かす
+  }
 
   // 今、画面のどこに、どの大きさで映っているか（2Dの切符を重ねるため）
   function getScreenRect(camera) {
@@ -122,5 +129,5 @@ export async function createTicket(state, { onLanded, camera } = {}) {
     };
   }
 
-  return { object: mesh, update, canvas, dispose, getScreenRect };
+    return { object: mesh, update, canvas, dispose, getScreenRect, refit };
 }

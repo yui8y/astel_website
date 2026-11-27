@@ -11,5 +11,9 @@ export function createTicketButton(onClick) {
     button.disabled = !on;
   }
 
-  return { setEnabled };
+  function setLabel(text) {
+    button.textContent = text;
+  }
+
+  return { setEnabled, setLabel };
 }

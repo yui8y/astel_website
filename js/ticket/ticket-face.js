@@ -62,9 +62,9 @@ export async function drawTicketFace(state) {
     32, 184
   );
 
-  // 右下：乗車記念
+  // 右下：乗車回数
   ctx.textAlign = 'right';
-  ctx.fillText('乗車記念', W - 32, 208);
+  ctx.fillText(`第${state.count ?? 1}回 乗車記念`, W - 32, 208);
   ctx.textAlign = 'left';
 
   return canvas;
