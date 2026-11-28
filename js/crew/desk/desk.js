@@ -28,7 +28,7 @@ const LAYOUTS = {
     lantern: [-0.9, -0.95, 0],
     astel:   [-0.3, 0.05, 0.08],
     outis:   [0.3, 0.75, -0.1, 0.045],
-    ticketPunch: [0.4, -0.85, 0.6], 
+    ticketPunch: [-0.5, -0.85, 0.6], 
   },
 };
 
@@ -89,7 +89,6 @@ export function createDesk() {
 
   
   const punch = ticketPunch();
-  punch.position.set(-0.65, -0.6, 0.8);
   group.add(punch);
 
   // ===== 壁の星図（本棚の上） =====
@@ -141,6 +140,7 @@ export function createDesk() {
     put(lantern.object, L.lantern);
     put(astelFile, L.astel);
     put(outisFile, L.outis);
+    put(punch, L.ticketPunch);
   }
 
     return { object: group, files: { astel: astelFile, outis: outisFile }, update, setLayout };
